@@ -54,7 +54,7 @@
     <textarea name="item" class="textarea" placeholder="買ったアイテムを入力してください"></textarea>
 
     <h2>個数:</h2>
-    <textarea name="quantity" class="textarea" placeholder="買ったアイテムの個数を入力してください"></textarea>
+    <input type="text" name="quantity" class="textarea" placeholder="個数を数字で入力してください" id="quantityInput">
 
     <h2>感想:</h2>
     <textarea name="feedback" class="textarea" placeholder="感想を入力してください"></textarea>
@@ -73,14 +73,22 @@
 
 <script>
   const form = document.getElementById('reviewForm');
+  const quantityInput = document.getElementById('quantityInput');
+  
   form.addEventListener('submit', function(event) {
     event.preventDefault();
 
     const site = form.querySelector('input[name="site"]:checked').value;
     const rating = form.querySelector('input[name="rating"]:checked').value;
     const item = form.querySelector('textarea[name="item"]').value;
-    const quantity = form.querySelector('textarea[name="quantity"]').value;
+    const quantity = quantityInput.value;
     const feedback = form.querySelector('textarea[name="feedback"]').value;
+
+    // 個数が数字でない場合は警告
+    if (isNaN(quantity) || quantity.trim() === "") {
+      alert('個数は数字のみ入力してください。');
+      return;
+    }
 
     // 確認セクションにレビュー内容を表示
     document.getElementById('reviewItem').textContent = item;
@@ -101,12 +109,39 @@
 
     // サイトに応じたWebhook URLに送信
     const webhookURL = site === 'gameClub' ? 'https://discord.com/api/webhooks/1328655432398667797/qPsVa5vcH-SL9exThNJaKyrZ560KaNWASc0UHHa8PIVZr4lNtew_6vcSJz5MjXU99MZv' : 'https://discord.com/api/webhooks/1328655690331328533/-bFeyYKjc62YL97n2LSERe6nPElK-hptdDNzGykMS1PXUYTuAr3NF8gWJkdFY6Mj7EXk';
+    
+    // Webhookに送る埋め込みメッセージの作成
+    const embedMessage = {
+      "embeds": [{
+        "title": "新しいレビュー",
+        "fields": [
+          {
+            "name": "💎【買ったもの】",
+            "value": item
+          },
+          {
+            "name": "🛍️【個数】",
+            "value": quantity
+          },
+          {
+            "name": "💬【感想】",
+            "value": feedback
+          },
+          {
+            "name": "⭐【評価】",
+            "value": "★".repeat(rating) + "☆".repeat(5 - rating)
+          }
+        ]
+      }]
+    };
+
+    // WebhookにPOSTリクエストを送信
     fetch(webhookURL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(reviewData),
+      body: JSON.stringify(embedMessage),
     }).then(response => {
       if (response.ok) {
         alert('レビューが送信されました!');
