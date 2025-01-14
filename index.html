@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>レビュー送信フォーム</title>
+  <style>
+    /* 基本のスタイル */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .rating {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+    .rating label {
+      cursor: pointer;
+    }
+    .textarea {
+      width: 100%;
+      height: 100px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>あなたはどのサイトで取引を行いましたか？</h1>
+  <form id="reviewForm">
+    <label>
+      <input type="radio" name="site" value="gameClub"> ゲームクラブ
+    </label>
+    <label>
+      <input type="radio" name="site" value="gameTrade"> ゲームトレード
+    </label>
+
+    <h2>評価を選択してください:</h2>
+    <div class="rating">
+      <label><input type="radio" name="rating" value="1"> ★☆☆☆☆</label>
+      <label><input type="radio" name="rating" value="2"> ★★☆☆☆</label>
+      <label><input type="radio" name="rating" value="3"> ★★★☆☆</label>
+      <label><input type="radio" name="rating" value="4"> ★★★★☆</label>
+      <label><input type="radio" name="rating" value="5"> ★★★★★</label>
+    </div>
+
+    <h2>買ったもの:</h2>
+    <textarea name="item" class="textarea" placeholder="買ったアイテムを入力してください"></textarea>
+
+    <h2>個数:</h2>
+    <textarea name="quantity" class="textarea" placeholder="買ったアイテムの個数を入力してください"></textarea>
+
+    <h2>感想:</h2>
+    <textarea name="feedback" class="textarea" placeholder="感想を入力してください"></textarea>
+
+    <button type="submit">送信</button>
+  </form>
+
+  <div id="confirmation" style="display: none;">
+    <h2>レビュー内容:</h2>
+    <p>💎【買ったもの】<span id="reviewItem"></span></p>
+    <p>🛍️【個数】<span id="reviewQuantity"></span></p>
+    <p>💬【感想】<span id="reviewFeedback"></span></p>
+    <p>⭐【評価】<span id="reviewRating"></span></p>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('reviewForm');
+  form.addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const site = form.querySelector('input[name="site"]:checked').value;
+    const rating = form.querySelector('input[name="rating"]:checked').value;
+    const item = form.querySelector('textarea[name="item"]').value;
+    const quantity = form.querySelector('textarea[name="quantity"]').value;
+    const feedback = form.querySelector('textarea[name="feedback"]').value;
+
+    // 確認セクションにレビュー内容を表示
+    document.getElementById('reviewItem').textContent = item;
+    document.getElementById('reviewQuantity').textContent = quantity;
+    document.getElementById('reviewFeedback').textContent = feedback;
+    document.getElementById('reviewRating').textContent = `★`.repeat(rating) + `☆`.repeat(5 - rating);
+    
+    document.getElementById('confirmation').style.display = 'block';
+
+    // 送信するデータを準備
+    const reviewData = {
+      site: site,
+      rating: rating,
+      item: item,
+      quantity: quantity,
+      feedback: feedback
+    };
+
+    // サイトに応じたWebhook URLに送信
+    const webhookURL = site === 'gameClub' ? 'https://discord.com/api/webhooks/1328655432398667797/qPsVa5vcH-SL9exThNJaKyrZ560KaNWASc0UHHa8PIVZr4lNtew_6vcSJz5MjXU99MZv' : 'https://discord.com/api/webhooks/1328655690331328533/-bFeyYKjc62YL97n2LSERe6nPElK-hptdDNzGykMS1PXUYTuAr3NF8gWJkdFY6Mj7EXk';
+    fetch(webhookURL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reviewData),
+    }).then(response => {
+      if (response.ok) {
+        alert('レビューが送信されました!');
+      } else {
+        alert('送信に失敗しました。');
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
