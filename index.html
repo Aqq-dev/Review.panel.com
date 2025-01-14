@@ -1,158 +1,127 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>レビュー送信フォーム</title>
-  <style>
-    /* 基本のスタイル */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-    }
-    .rating {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 15px;
-    }
-    .rating label {
-      cursor: pointer;
-    }
-    .textarea {
-      width: 100%;
-      height: 100px;
-      margin-bottom: 15px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>取引評価フォーム</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+        }
+        label, textarea, select, input[type="number"] {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        textarea {
+            height: 100px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>あなたはどのサイトで取引を行いましたか？</h1>
-  <form id="reviewForm">
-    <label>
-      <input type="radio" name="site" value="gameClub"> ゲームクラブ
-    </label>
-    <label>
-      <input type="radio" name="site" value="gameTrade"> ゲームトレード
-    </label>
+    <h2>取引評価フォーム</h2>
+    <form id="tradeForm">
+        <label for="site">あなたはどのサイトで取引を行いましたか？</label>
+        <select id="site" required>
+            <option value="">選択してください</option>
+            <option value="ゲームトレード">ゲームトレード</option>
+            <option value="ゲームクラブ">ゲームクラブ</option>
+        </select>
 
-    <h2>評価を選択してください:</h2>
-    <div class="rating">
-      <label><input type="radio" name="rating" value="1"> ★☆☆☆☆</label>
-      <label><input type="radio" name="rating" value="2"> ★★☆☆☆</label>
-      <label><input type="radio" name="rating" value="3"> ★★★☆☆</label>
-      <label><input type="radio" name="rating" value="4"> ★★★★☆</label>
-      <label><input type="radio" name="rating" value="5"> ★★★★★</label>
-    </div>
+        <label for="rating">評価</label>
+        <select id="rating" required>
+            <option value="">選択してください</option>
+            <option value="★☆☆☆☆">1 星</option>
+            <option value="★★☆☆☆">2 星</option>
+            <option value="★★★☆☆">3 星</option>
+            <option value="★★★★☆">4 星</option>
+            <option value="★★★★★">5 星</option>
+        </select>
 
-    <h2>買ったもの:</h2>
-    <textarea name="item" class="textarea" placeholder="買ったアイテムを入力してください"></textarea>
+        <label for="item">買ったもの</label>
+        <textarea id="item" placeholder="買ったものを入力してください" required></textarea>
 
-    <h2>個数:</h2>
-    <input type="text" name="quantity" class="textarea" placeholder="個数を数字で入力してください" id="quantityInput">
+        <label for="quantity">個数</label>
+        <input type="number" id="quantity" placeholder="個数を入力してください" required>
 
-    <h2>感想:</h2>
-    <textarea name="feedback" class="textarea" placeholder="感想を入力してください"></textarea>
+        <label for="feedback">感想</label>
+        <textarea id="feedback" placeholder="感想を入力してください" required></textarea>
 
-    <button type="submit">送信</button>
-  </form>
-
-  <div id="confirmation" style="display: none;">
-    <h2>レビュー内容:</h2>
-    <p>💎【買ったもの】<span id="reviewItem"></span></p>
-    <p>🛍️【個数】<span id="reviewQuantity"></span></p>
-    <p>💬【感想】<span id="reviewFeedback"></span></p>
-    <p>⭐【評価】<span id="reviewRating"></span></p>
-  </div>
+        <div class="button-container">
+            <button type="submit">送信</button>
+        </div>
+    </form>
 </div>
 
 <script>
-  const form = document.getElementById('reviewForm');
-  const quantityInput = document.getElementById('quantityInput');
-  
-  form.addEventListener('submit', function(event) {
-    event.preventDefault();
+    document.getElementById('tradeForm').addEventListener('submit', function (e) {
+        e.preventDefault();
 
-    const site = form.querySelector('input[name="site"]:checked').value;
-    const rating = form.querySelector('input[name="rating"]:checked').value;
-    const item = form.querySelector('textarea[name="item"]').value;
-    const quantity = quantityInput.value;
-    const feedback = form.querySelector('textarea[name="feedback"]').value;
+        // ユーザー入力情報取得
+        const site = document.getElementById('site').value;
+        const rating = document.getElementById('rating').value;
+        const item = document.getElementById('item').value;
+        const quantity = document.getElementById('quantity').value;
+        const feedback = document.getElementById('feedback').value;
 
-    // 個数が数字でない場合は警告
-    if (isNaN(quantity) || quantity.trim() === "") {
-      alert('個数は数字のみ入力してください。');
-      return;
-    }
+        // 送信データの構成
+        const webhookURL = site === "ゲームクラブ" ? "https://discord.com/api/webhooks/1328655432398667797/qPsVa5vcH-SL9exThNJaKyrZ560KaNWASc0UHHa8PIVZr4lNtew_6vcSJz5MjXU99MZv" : "https://discord.com/api/webhooks/1328655690331328533/-bFeyYKjc62YL97n2LSERe6nPElK-hptdDNzGykMS1PXUYTuAr3NF8gWJkdFY6Mj7EXk";
+        const embedMessage = {
+            embeds: [
+                {
+                    title: "取引評価",
+                    fields: [
+                        { name: "💎【買ったもの】", value: item },
+                        { name: "🛍️【個数】", value: quantity },
+                        { name: "💬【感想】", value: feedback },
+                        { name: "⭐【評価】", value: rating }
+                    ],
+                    color: 3066993 // 送信色
+                }
+            ]
+        };
 
-    // 確認セクションにレビュー内容を表示
-    document.getElementById('reviewItem').textContent = item;
-    document.getElementById('reviewQuantity').textContent = quantity;
-    document.getElementById('reviewFeedback').textContent = feedback;
-    document.getElementById('reviewRating').textContent = `★`.repeat(rating) + `☆`.repeat(5 - rating);
-    
-    document.getElementById('confirmation').style.display = 'block';
-
-    // 送信するデータを準備
-    const reviewData = {
-      site: site,
-      rating: rating,
-      item: item,
-      quantity: quantity,
-      feedback: feedback
-    };
-
-    // サイトに応じたWebhook URLに送信
-    const webhookURL = site === 'gameClub' ? 'https://discord.com/api/webhooks/1328655432398667797/qPsVa5vcH-SL9exThNJaKyrZ560KaNWASc0UHHa8PIVZr4lNtew_6vcSJz5MjXU99MZv' : 'https://discord.com/api/webhooks/1328655690331328533/-bFeyYKjc62YL97n2LSERe6nPElK-hptdDNzGykMS1PXUYTuAr3NF8gWJkdFY6Mj7EXk';
-    
-    // Webhookに送る埋め込みメッセージの作成
-    const embedMessage = {
-      {
-  "embeds": [{
-    "title": "実績記入ありがとうございます！",
-    "color": 00ff00,  // ここで色を指定
-    "fields": [
-      {
-        "name": "💎【買ったもの】",
-        "value": "item"
-      },
-      {
-        "name": "🛍️【個数】",
-        "value": "quantity"
-      },
-      {
-        "name": "💬【感想】",
-        "value": "feedback"
-      },
-      {
-        "name": "⭐【評価】",
-        "value": "★".repeat(rating) + "☆".repeat(5 - rating)
-      }
-    ]
-  }]
-}
-
-
-    // WebhookにPOSTリクエストを送信
-    fetch(webhookURL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(embedMessage),
-    }).then(response => {
-      if (response.ok) {
-        alert('レビューが送信されました!');
-      } else {
-        alert('送信に失敗しました。');
-      }
+        // Webhookに送信
+        fetch(webhookURL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(embedMessage)
+        }).then(response => {
+            if (response.ok) {
+                alert("送信が完了しました！");
+                document.getElementById('tradeForm').reset();
+            } else {
+                alert("送信に失敗しました。");
+            }
+        });
     });
-  });
 </script>
 
 </body>
