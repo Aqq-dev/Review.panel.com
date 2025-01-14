@@ -16,7 +16,7 @@
             border-radius: 10px;
             background-color: #f9f9f9;
         }
-        label, textarea, select, input[type="number"] {
+        label, textarea, select, input[type="number"], input[type="password"] {
             width: 100%;
             margin-bottom: 10px;
         }
@@ -32,12 +32,19 @@
             padding: 10px 20px;
             border: none;
             border-radius: 5px;
-            background-color: #4CAF50;
+            background-color: #9ACD32; /* 黄緑色 */
             color: white;
             cursor: pointer;
         }
-        button:hover {
-            background-color: #45a049;
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        button:hover:not(:disabled) {
+            background-color: #7CB62D;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
@@ -45,7 +52,18 @@
 
 <div class="container">
     <h2>取引評価フォーム</h2>
-    <form id="tradeForm">
+    
+    <!-- ログインフォーム -->
+    <form id="loginForm">
+        <label for="loginCode">ログインコードを入力してください</label>
+        <input type="password" id="loginCode" placeholder="ログインコード" required>
+        <div class="button-container">
+            <button type="submit">ログイン</button>
+        </div>
+    </form>
+
+    <!-- 取引評価フォーム（初期状態では非表示） -->
+    <form id="tradeForm" class="hidden">
         <label for="site">あなたはどのサイトで取引を行いましたか？</label>
         <select id="site" required>
             <option value="">選択してください</option>
@@ -73,13 +91,35 @@
         <textarea id="feedback" placeholder="感想を入力してください" required></textarea>
 
         <div class="button-container">
-            <button type="submit">送信</button>
+            <button type="submit" id="submitButton">送信</button>
         </div>
     </form>
 </div>
 
 <script>
-    document.getElementById('tradeForm').addEventListener('submit', function (e) {
+    const loginForm = document.getElementById('loginForm');
+    const tradeForm = document.getElementById('tradeForm');
+    const submitButton = document.getElementById('submitButton');
+
+    // ログインコード
+    const LOGIN_CODE = "catsshop345";
+
+    // ログインフォームの送信処理
+    loginForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const loginCode = document.getElementById('loginCode').value;
+
+        if (loginCode === LOGIN_CODE) {
+            alert("ログイン成功！");
+            loginForm.classList.add('hidden'); // ログインフォームを非表示
+            tradeForm.classList.remove('hidden'); // 取引評価フォームを表示
+        } else {
+            alert("ログインコードが間違っています。");
+        }
+    });
+
+    // 取引評価フォームの送信処理
+    tradeForm.addEventListener('submit', function (e) {
         e.preventDefault();
 
         // ユーザー入力情報取得
@@ -97,11 +137,11 @@
                     title: "取引評価",
                     fields: [
                         { name: "💎【買ったもの】", value: item },
-                        { name: "🛍️【個数】", value: quantity },
+                        { name: "🛍️【個数】", value: quantity 個},
                         { name: "💬【感想】", value: feedback },
                         { name: "⭐【評価】", value: rating }
                     ],
-                    color: 3066993 // 送信色
+                    color: 3066993 // Webhook埋め込みメッセージの色
                 }
             ]
         };
@@ -116,7 +156,8 @@
         }).then(response => {
             if (response.ok) {
                 alert("送信が完了しました！");
-                document.getElementById('tradeForm').reset();
+                tradeForm.reset();
+                submitButton.disabled = true; // 送信ボタンを無効化
             } else {
                 alert("送信に失敗しました。");
             }
