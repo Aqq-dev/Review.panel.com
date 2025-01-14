@@ -127,9 +127,9 @@
 
         // ユーザー入力情報取得
         const site = document.getElementById('site').value;
-        const rating = document.getElementById('rating').value;
+        const rating = `__${document.getElementById('rating').value}__`; // アンダースコアで囲む
         const item = document.getElementById('item').value;
-        const quantity = document.getElementById('quantity').value;
+        const quantity = `${document.getElementById('quantity').value}個`; // 個を追加
         const feedback = document.getElementById('feedback').value;
 
         // Webhook URL の選択
@@ -142,9 +142,9 @@
                     title: "取引評価",
                     fields: [
                         { name: "💎【買ったもの】", value: item },
-                        { name: "🛍️【個数】", value: quantity 個},
+                        { name: "🛍️【個数】", value: quantity },
                         { name: "💬【感想】", value: feedback },
-                        { name: "⭐【評価】", value: __rating__ }
+                        { name: "⭐【評価】", value: rating }
                     ],
                     color: 3066993
                 }
